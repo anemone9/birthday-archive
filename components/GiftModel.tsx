@@ -11,7 +11,7 @@ function PhotoPlaceholder({failed=false}:{failed?:boolean}){
   return <div className="model-empty-state"><div className="model-empty-card">
     <ImageIcon aria-hidden="true"/>
     <strong>{failed?'照片暂时无法显示':'这份礼物的照片还没放进来'}</strong>
-    <span>{failed?'请检查图片，或在编辑页重新上传。':'在「编辑我的礼物」中上传实物照片，这里就会展示给她。'}</span>
+    <span>{failed?'请检查图片，或在编辑页重新上传。':'在「编辑我的礼物」中上传实物照片，这里就会展示。'}</span>
   </div></div>;
 }
 
@@ -187,10 +187,7 @@ export default function GiftModel({gift}:{gift:Gift}) {
   const showingModel=Boolean(gift.model)&&!photo;
 
   return <div className="model-panel">
-    <div className="model-caption">
-      <span>{showingModel?<Box size={14}/>:<ImageIcon size={14}/>} {showingModel?'你的礼物模型':hasPhoto?'礼物实物照片':'礼物照片'}</span>
-      {hasPhoto&&gift.model&&<button className="text-button small" onClick={()=>{setPhoto(!photo);setPhotoError(false);}}><ImageIcon size={14}/>{photo?'查看模型':'查看照片'}</button>}
-    </div>
+    {hasPhoto&&gift.model&&<div className="model-caption"><button className="text-button small" onClick={()=>{setPhoto(!photo);setPhotoError(false);}}><ImageIcon size={14}/>{photo?'查看模型':'查看照片'}</button></div>}
     <div className="model-stage">
       {photo&&gift.image
         ?photoError?<PhotoPlaceholder failed/>:<img className="gift-photo" src={gift.image} alt={gift.name+'的实物照片'} onError={()=>setPhotoError(true)}/>

@@ -15,10 +15,10 @@ function glb(json: unknown) {
 
 test('backup round trip preserves Chinese paragraphs, gift ordering and signature', () => {
   const archive = createArchive();
-  archive.letter = '收件人：\n第一段。\n\n第二段。';
+  archive.letter = '亲爱的你：\n第一段。\n\n第二段。';
   archive.gifts.reverse();
   const result = validateArchive(JSON.parse(JSON.stringify(archive)));
-  assert.equal(result.letter, '收件人：\n第一段。\n\n第二段。');
+  assert.equal(result.letter, '亲爱的你：\n第一段。\n\n第二段。');
   assert.equal(result.signature, '爱你的人');
   assert.equal(result.gifts[0].name, '第四份礼物');
   assert.equal(result.gifts.length, 4);

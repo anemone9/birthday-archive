@@ -1,7 +1,7 @@
 export type GiftKind = 'camera' | 'cup' | 'cap' | 'care' | 'custom';
 export type GiftColor = 'lavender' | 'rose' | 'sage' | 'pink' | 'sky' | 'silver';
 export type Gift = { id: string; name: string; unopenedText: string; reason: string; kind: GiftKind; color: GiftColor; image?: string; model?: string; modelName?: string };
-export type Archive = { version: 1; brand: string; recipient: string; title: string; subtitle: string; letter: string; signature: string; gifts: Gift[] };
+export type Archive = { version: 1; brand: string; recipient: string; title: string; subtitle: string; letter: string; signature: string; celebrationButtonLabel: string; gifts: Gift[] };
 export const MAX_GIFTS = 12;
 export const MAX_BACKUP_BYTES = 120 * 1024 * 1024;
 export const MAX_MEDIA_TOTAL_BYTES = 80 * 1024 * 1024;
@@ -11,11 +11,11 @@ const kinds: GiftKind[] = ['camera', 'cup', 'cap', 'care', 'custom'];
 const colors: GiftColor[] = ['lavender', 'rose', 'sage', 'pink', 'sky', 'silver'];
 
 export function createArchive(): Archive {
-  return {version:1,brand:'生日快乐！',recipient:'亲爱的你',title:'把心意，一件件送给你。',subtitle:'一封写给你的信，和几份想亲手交给你的礼物。',letter:'',signature:'爱你的人',gifts:[
-    {id:'gift-1',name:'第一份礼物',unopenedText:DEFAULT_UNOPENED_GIFT_TEXT,reason:'',kind:'custom',color:'lavender'},
-    {id:'gift-2',name:'第二份礼物',unopenedText:DEFAULT_UNOPENED_GIFT_TEXT,reason:'',kind:'custom',color:'sky'},
-    {id:'gift-3',name:'第三份礼物',unopenedText:DEFAULT_UNOPENED_GIFT_TEXT,reason:'',kind:'custom',color:'pink'},
-    {id:'gift-4',name:'第四份礼物',unopenedText:DEFAULT_UNOPENED_GIFT_TEXT,reason:'',kind:'custom',color:'silver'},
+  return {version:1,brand:'生日快乐！',recipient:'亲爱的你',title:'把心意，一件件送给你。',subtitle:'一封写给你的信，和几份想亲手交给你的礼物。',letter:'',signature:'爱你的人',celebrationButtonLabel:'进入最后页面',gifts:[
+    {id:'camera',name:'第一份礼物',unopenedText:DEFAULT_UNOPENED_GIFT_TEXT,reason:'',kind:'custom',color:'lavender'},
+    {id:'cup',name:'第二份礼物',unopenedText:DEFAULT_UNOPENED_GIFT_TEXT,reason:'',kind:'custom',color:'rose'},
+    {id:'cap',name:'第三份礼物',unopenedText:DEFAULT_UNOPENED_GIFT_TEXT,reason:'',kind:'custom',color:'sage'},
+    {id:'care',name:'第四份礼物',unopenedText:DEFAULT_UNOPENED_GIFT_TEXT,reason:'',kind:'custom',color:'silver'},
   ]};
 }
 function record(value: unknown): Record<string, unknown> {
@@ -62,7 +62,7 @@ export function validateArchive(input:unknown):Archive {
     if(!kinds.includes(g.kind as GiftKind)||!colors.includes(color)) throw new Error('礼物样式不正确。');
     return {id,name:field(g.name,'礼物名称',80,true),unopenedText:field(g.unopenedText??DEFAULT_UNOPENED_GIFT_TEXT,'礼盒未打开时显示的文字',40,true),reason:field(g.reason,'挑选理由',4000),kind:g.kind as GiftKind,color,image:media(g.image,'image'),model:media(g.model,'model'),modelName:g.modelName?field(g.modelName,'模型文件名',240):undefined};
   });
-  return {version:1,brand:field(row.brand??'生日快乐！','页眉标题',60,true),recipient:field(row.recipient,'称呼',50,true),title:field(row.title,'封面标题',100,true),subtitle:field(row.subtitle,'封面小字',240),letter:field(row.letter,'信件',20000),signature:field(row.signature,'署名',80,true),gifts};
+  return {version:1,brand:field(row.brand??'生日快乐！','页眉标题',60,true),recipient:field(row.recipient,'称呼',50,true),title:field(row.title,'封面标题',100,true),subtitle:field(row.subtitle,'封面小字',240),letter:field(row.letter,'信件',20000),signature:field(row.signature,'署名',80,true),celebrationButtonLabel:field(row.celebrationButtonLabel??'进入最后页面','庆祝按钮文字',40,true),gifts};
 }
 export function validateUploadMeta(file:{name:string;size:number;type:string},kind:'image'|'model') {
   if(file.size<=0) throw new Error('这个文件是空的，请重新选择。');

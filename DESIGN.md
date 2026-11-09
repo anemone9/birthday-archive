@@ -1,13 +1,41 @@
-# Birthday Archive Design
+# 给你的生日档案
 
-## Visual direction
-A warm pink, plum and paper palette with a restrained retro desktop frame. Keep the birthday letter and gifts central. Use short labels and clear actions. Avoid brand logos and character artwork.
+## Intent
+一封纸质生日信加上一间可以逐个拆开的礼物房间。送礼者可填写收件人、页眉与封面标题、信件、署名、礼物名称、理由和照片；默认内容不预设任何人的昵称或礼物清单。访客流程以表达和停留为主，编辑流程以清晰和可靠为主。
 
-## Interaction
-The visitor flow is cover, envelope, letter, gift room and individual gift details. The editor supports local customization and backup export or import.
+## Visual language
+参考用户选定的小红书生日档案成品图，以淡粉渐层、柔光和散落的四角星作为全站背景。生日信封页和信件页采用粉色信纸、探出的生日卡、缎带蝴蝶结和细致内框，不显示复古电脑标题栏。中文信件采用楷宋过渡的笔触，英文小标题用 Georgia 斜体。信纸使用浅粉旧纸纹理、不规则撕边、复古细花框和右上角缎面蝴蝶结，字句直接排在纸面，不另贴拍立得。礼物提示和礼物名称采用黑体，礼物卡保持半透明磨砂玻璃质感，同时保证文字清楚。页眉保留插画风蝴蝶结；生日信封使用用户提供的美乐蒂草莓原图作为连续背景，不拆分、不淡化过渡，收件人文字落在左侧浅色留白卡片上，不描摹或重绘角色。星星保持静态，避免持续动画。礼盒本身继续使用粉、天蓝、银白与其他已有颜色，确保礼物之间容易区分。复古桌面细节只作为辅助，不额外添加小游戏。
 
-## Accessibility and motion
-Use semantic buttons and visible keyboard focus. Keep text contrast clear. Animate page entry and gift-card arrival with brief opacity and position changes. Respect reduced-motion preferences and avoid continuously running decorative effects.
+## Tokens and ownership
+app/globals.css 的 :root 是运行时唯一 token 所有者；本文件记录其语义。组件只消费 CSS 变量。
 
-## Privacy
-Personal archive content belongs to the visitor's browser storage. Never place a real letter, recipient name, gift reason, photo or model file in source defaults or commits.
+| Token | Value | Role |
+| --- | --- | --- |
+| --ink | #452638 | 主文字 |
+| --muted | #745b6a | 辅助文字 |
+| --paper | #fffaf9 | 信纸与表单 |
+| --warm-paper | #fff2f5 | 暖粉白表面 |
+| --lavender | #fff0f4 | 全站淡粉底色 |
+| --rose-soft | #f6dce5 | 柔粉表面 |
+| --purple | #99556f | 玫瑰色标题、按钮与焦点 |
+| --rose | #e39ab2 | 礼盒与星星点缀 |
+| --rose-deep | #80465d | 深玫瑰文字与封口 |
+| --body | Songti SC, STSong, Noto Serif SC, SimSun, serif | 生日体验中文正文 |
+| --display | Noto Serif SC, Songti SC, STSong, SimSun, serif | 标题与信件 |
+| --accent | Georgia, Times New Roman, serif | 英文斜体标签 |
+| --sage | #bfd1c4 | 礼盒装饰 |
+| --line | #c38ca3 | 窗口边框 |
+
+## Typography
+信件正文优先使用本机楷体与宋体，英文生日标题使用 Georgia 斜体，不加载外部字体。礼物卡片名称和提示优先使用 SimHei、Microsoft YaHei 等黑体字体。编辑器单独保留 Microsoft YaHei、PingFang SC 等无衬线字体，保证表单阅读清晰。
+
+烟花庆祝页是全站唯一的深色收尾场景，使用夜空黑 `#050b18`、低饱和香槟金与暖白，避免粉蓝等鲜艳色。密集的大型烟花铺满全屏，中央显示由收件人字段生成的生日祝福，返回路径沿用左上角品牌按钮和右下角从头再看。
+
+## Layout and shapes
+最大阅读宽度 1160px；手机竖向重排，礼盒两列。长信件自然滚动。编辑页为两栏，在 860px 以下堆叠。主按钮至少 48px 高，窗口边角为直角像素框。信封页以居中粉色信封和露出的生日卡为主角；信件页使用细内框、蕾丝、贴纸与右上角丝带装饰。礼盒选择页以柔和的玻璃卡片承接粉色星空背景，照片边缘保留一圈呼吸距离。
+
+## Motion and accessibility
+开信封和礼盒的动作服务揭晓。庆祝页烟花持续播放至用户离开，Canvas 像素比最高为 1.5，限制同时存在的粒子；切换到后台时暂停，离开页面时清理帧循环。prefers-reduced-motion 用户看到静态烟花图案。其他页面和礼物卡只使用一次性、短时的透明度与位移动画；不提供音乐控件，不自动播放声音。所有入口是按钮，键盘可用，拖动有点击替代。Focus 样式统一。展示页不出现空白卡死，模型失败提供照片和返回。
+
+## Scrollbars
+应用全局 scrollbar-color 使用 --line 与 --paper，hover 使用 --purple，forced-colors 恢复系统颜色。页面拥有主滚动，编辑内容不锁死高度。
