@@ -43,7 +43,7 @@ public/melody-strawberry-pattern.webp 和 public/melody-strawberry-tile.webp 中
 
 ### 许可说明
 
-软件源码许可与图片素材权利分开处理。正式许可证会在 LICENSE 文件中说明。未列入软件许可证的第三方素材不因源码公开而自动获得再使用许可。
+软件源码采用 MIT 许可证，详见 LICENSE。该许可只覆盖软件源码，不覆盖生日照片、蝴蝶结图片、美乐蒂主题图案或其他媒体素材。美乐蒂主题图案属于第三方角色素材，重新发布或商业使用前，请确认你拥有相应权利，或替换为自己有权使用的图片。
 
 ## English
 
@@ -84,4 +84,4 @@ The My Melody themed patterns in public/melody-strawberry-pattern.webp and publi
 
 ### License
 
-The software source license and image asset rights are handled separately. The final license will be documented in the LICENSE file. Third party assets not included in the software license do not automatically receive reuse permission when the source is made public.
+The software source is licensed under the MIT License. See LICENSE. This license covers the software source only. It does not cover birthday photos, bow images, My Melody themed artwork, or other media assets. The My Melody artwork is third party character material. Confirm that you have the required rights or replace it with artwork you are allowed to use before redistribution or commercial use.
