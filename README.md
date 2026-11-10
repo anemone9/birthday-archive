@@ -30,7 +30,7 @@
 
 需要 Node.js 22.13 或更新版本。
 
-1. 克隆仓库并安装依赖：运行 npm ci。
+1. 克隆仓库并运行 npm run install:ci 安装依赖。
 2. 检查 .openai/hosting.json。模板配置使用 DB 和 BUCKET 作为 D1 与 R2 绑定名。部署到自己的 Sites 项目之前，请把 project_id 替换为自己创建项目后获得的编号。
 3. 运行 npm run dev，开发服务器默认使用本机 5173 端口。
 4. 运行 npm run build，生成部署构建。
@@ -71,7 +71,7 @@ Choose “清空自定义数据” (Clear custom data) in the editor to restore 
 
 Node.js 22.13 or newer is required.
 
-1. Clone the repository and install dependencies with npm ci.
+1. Clone the repository and install dependencies with npm run install:ci.
 2. Check .openai/hosting.json. The template uses DB and BUCKET as the D1 and R2 binding names. Before deploying to your own Sites project, replace project_id with the ID returned when you create that project.
 3. Run npm run dev. The development server uses local port 5173 by default.
 4. Run npm run build to create the deployment build.
