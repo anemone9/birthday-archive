@@ -52,8 +52,8 @@ export async function authorizeShare(request: Request, id: string) {
   return row;
 }
 
-export function validateExpectedAssets(input: unknown, archive: Archive): ExpectedAsset[] {
-  if (!Array.isArray(input) || input.length > archive.gifts.length * 2) throw new Error("上传文件清单不正确。");
+export function validateExpectedAssets(input: unknown, archive: Archive, allowEnvelopeBackground = false): ExpectedAsset[] {
+  if (!Array.isArray(input) || input.length > archive.gifts.length * 2 + 1) throw new Error("上传文件清单不正确。");
   const giftIds = new Set(archive.gifts.map(gift => gift.id));
   const seen = new Set<string>();
   let total = 0;
@@ -63,7 +63,8 @@ export function validateExpectedAssets(input: unknown, archive: Archive): Expect
     const giftId = item.giftId;
     const kind = item.kind;
     const byteLength = item.byteLength;
-    if (typeof giftId !== "string" || !giftIds.has(giftId) || (kind !== "image" && kind !== "model")
+    const isEnvelopeBackground = allowEnvelopeBackground && giftId === "__envelope__" && kind === "image";
+    if (typeof giftId !== "string" || (!giftIds.has(giftId) && !isEnvelopeBackground) || (kind !== "image" && kind !== "model")
       || typeof byteLength !== "number" || !Number.isInteger(byteLength) || byteLength <= 0) {
       throw new Error("上传文件清单不正确。");
     }
@@ -73,7 +74,7 @@ export function validateExpectedAssets(input: unknown, archive: Archive): Expect
     const limit = kind === "image" ? 8 * 1024 * 1024 : 20 * 1024 * 1024;
     if (byteLength > limit) throw new Error(kind === "image" ? "单张照片不能超过 8MB。" : "单个模型不能超过 20MB。");
     total += byteLength;
-    if (total > 80 * 1024 * 1024) throw new Error("照片和模型合计不能超过 80MB。");
+    if (total > 80 * 1024 * 1024) throw new Error("照片、信封背景和模型合计不能超过 80MB。");
     return { giftId, kind, byteLength };
   });
   return result;
@@ -90,8 +91,10 @@ export async function loadSharedArchive(id: string): Promise<Archive | null> {
   }
   const assets = await getDb().select().from(sharedAssets).where(eq(sharedAssets.shareId, id));
   const byKey = new Map(assets.map(asset => [asset.giftId + ":" + asset.kind, asset]));
+  const envelopeBackground = byKey.get("__envelope__:image");
   return {
     ...archive,
+    envelopeBackground: envelopeBackground ? `/api/share/${id}/media/__envelope__/image` : undefined,
     gifts: archive.gifts.map(gift => {
       const image = byKey.get(gift.id + ":image");
       const model = byKey.get(gift.id + ":model");

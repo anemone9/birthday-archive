@@ -13,12 +13,20 @@ export async function POST(request: Request) {
   try {
     const payload = await request.json() as { archive?: unknown; assets?: unknown };
     if (!payload.archive || typeof payload.archive !== "object") throw new Error("没有读取到生日档案内容。");
-    const rawGifts = (payload.archive as { gifts?: unknown }).gifts;
+    const rawArchive = payload.archive as { gifts?: unknown; envelopeBackground?: unknown; hasEnvelopeBackground?: unknown };
+    const rawGifts = rawArchive.gifts;
     if (!Array.isArray(rawGifts) || rawGifts.some(gift => gift && typeof gift === "object" && ((gift as {image?:unknown}).image || (gift as {model?:unknown}).model))) {
       throw new Error("请重新生成分享页，媒体文件会单独安全上传。");
     }
+    if (rawArchive.envelopeBackground || (rawArchive.hasEnvelopeBackground !== undefined && typeof rawArchive.hasEnvelopeBackground !== "boolean")) {
+      throw new Error("请重新生成分享页，信封背景会单独安全上传。");
+    }
+    const hasEnvelopeBackground = rawArchive.hasEnvelopeBackground === true;
     const archive = validateArchive(payload.archive);
-    const assets = validateExpectedAssets(payload.assets, archive);
+    const assets = validateExpectedAssets(payload.assets, archive, hasEnvelopeBackground);
+    if (hasEnvelopeBackground && !assets.some(asset => asset.giftId === "__envelope__" && asset.kind === "image")) {
+      throw new Error("信封背景未包含在上传清单中。");
+    }
     const id = makeRandomToken(24);
     const token = makeRandomToken(32);
     await getDb().insert(sharedArchives).values({

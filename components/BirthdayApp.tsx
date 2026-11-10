@@ -37,7 +37,7 @@ export default function BirthdayApp({initialArchive,readOnly=false}:{initialArch
         <h1 ref={heading} tabIndex={-1}>有些话，想先告诉你。</h1>
         <div className={'interactive-envelope'+(tearing?' tearing':'')}>
           <div className="envelope-letter-peek"><span className="envelope-peek-kicker">a little note for you</span><span className="envelope-peek-title">Happy Birthday</span><BirthdayBow className="envelope-peek-bow"/></div>
-          <div className="envelope-body">
+          <div className="envelope-body" style={archive.envelopeBackground?{backgroundImage:`linear-gradient(rgba(255,247,250,.08),rgba(255,247,250,.08)),url(${archive.envelopeBackground})`}:undefined}>
             <span className="envelope-address">TO / 收信人<br/><strong>{archive.recipient}</strong></span>
           </div>
           <button className="tear-strip" aria-label="点击或向右拖动，撕开生日信封" style={{'--tear':`${tear}%`} as CSSProperties} onClick={openLetter} onPointerDown={e=>{start.current=e.clientX;e.currentTarget.setPointerCapture(e.pointerId);}} onPointerMove={e=>{if(start.current!==null)setTear(Math.max(0,Math.min(100,(e.clientX-start.current)/2.4)));}} onPointerUp={e=>{if(start.current!==null&&e.clientX-start.current>70)openLetter();else setTear(0);start.current=null;}} onPointerCancel={()=>{start.current=null;setTear(0);}} disabled={tearing}><span>轻轻拆开这封信</span><ArrowRight size={20}/></button>

@@ -1,7 +1,7 @@
 export type GiftKind = 'camera' | 'cup' | 'cap' | 'care' | 'custom';
 export type GiftColor = 'lavender' | 'rose' | 'sage' | 'pink' | 'sky' | 'silver';
 export type Gift = { id: string; name: string; unopenedText: string; reason: string; kind: GiftKind; color: GiftColor; image?: string; model?: string; modelName?: string };
-export type Archive = { version: 1; brand: string; recipient: string; title: string; subtitle: string; letter: string; signature: string; celebrationButtonLabel: string; gifts: Gift[] };
+export type Archive = { version: 1; brand: string; recipient: string; title: string; subtitle: string; letter: string; signature: string; celebrationButtonLabel: string; envelopeBackground?: string; gifts: Gift[] };
 export const MAX_GIFTS = 12;
 export const MAX_BACKUP_BYTES = 120 * 1024 * 1024;
 export const MAX_MEDIA_TOTAL_BYTES = 80 * 1024 * 1024;
@@ -42,7 +42,7 @@ function media(value:unknown,type:'image'|'model'):string|undefined {
   const bytes=decodeBase64(match[2]);
   if(bytes.byteLength>max) throw new Error(`${label}文件过大。`);
   mediaTotalBytes+=bytes.byteLength;
-  if(mediaTotalBytes>MAX_MEDIA_TOTAL_BYTES) throw new Error('照片和模型合计请控制在 80MB 以内，备份才可以正常导出和导入。');
+  if(mediaTotalBytes>MAX_MEDIA_TOTAL_BYTES) throw new Error('信封背景、照片和模型合计请控制在 80MB 以内，备份才可以正常导出和导入。');
   if(type==='model') assertEmbeddedGLB(bytes);
   else if(!imageMime(bytes)) throw new Error('图片内容不是有效的 PNG、JPEG 或 WebP。');
   return value;
@@ -62,7 +62,7 @@ export function validateArchive(input:unknown):Archive {
     if(!kinds.includes(g.kind as GiftKind)||!colors.includes(color)) throw new Error('礼物样式不正确。');
     return {id,name:field(g.name,'礼物名称',80,true),unopenedText:field(g.unopenedText??DEFAULT_UNOPENED_GIFT_TEXT,'礼盒未打开时显示的文字',40,true),reason:field(g.reason,'挑选理由',4000),kind:g.kind as GiftKind,color,image:media(g.image,'image'),model:media(g.model,'model'),modelName:g.modelName?field(g.modelName,'模型文件名',240):undefined};
   });
-  return {version:1,brand:field(row.brand??'生日快乐！','页眉标题',60,true),recipient:field(row.recipient,'称呼',50,true),title:field(row.title,'封面标题',100,true),subtitle:field(row.subtitle,'封面小字',240),letter:field(row.letter,'信件',20000),signature:field(row.signature,'署名',80,true),celebrationButtonLabel:field(row.celebrationButtonLabel??'进入最后页面','庆祝按钮文字',40,true),gifts};
+  return {version:1,brand:field(row.brand??'生日快乐！','页眉标题',60,true),recipient:field(row.recipient,'称呼',50,true),title:field(row.title,'封面标题',100,true),subtitle:field(row.subtitle,'封面小字',240),letter:field(row.letter,'信件',20000),signature:field(row.signature,'署名',80,true),celebrationButtonLabel:field(row.celebrationButtonLabel??'进入最后页面','庆祝按钮文字',40,true),envelopeBackground:media(row.envelopeBackground,'image'),gifts};
 }
 export function validateUploadMeta(file:{name:string;size:number;type:string},kind:'image'|'model') {
   if(file.size<=0) throw new Error('这个文件是空的，请重新选择。');
@@ -96,6 +96,7 @@ async function assertImageDecodes(source:string|Blob) {
 }
 export async function validateArchiveMedia(input:unknown):Promise<Archive> {
   const archive=validateArchive(input);
+  if(archive.envelopeBackground)await assertImageDecodes(archive.envelopeBackground);
   for(const gift of archive.gifts)if(gift.image)await assertImageDecodes(gift.image);
   return archive;
 }

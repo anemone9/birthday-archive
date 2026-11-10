@@ -15,10 +15,11 @@
 1. 打开上方在线模板，选择“编辑我的礼物”。
 2. 填写页面标题、收件人称呼、生日信、署名和最后庆祝页面的按钮文字。
 3. 编辑礼物名称、拆开前的提示语、挑选理由，也可以为礼物添加照片或 GLB 2.0 模型。
-4. 草稿保存在当前浏览器。跨设备编辑时，请先导出备份，再在另一台设备导入。
-5. 完成后选择“生成只读链接”，等待内容和媒体上传完成，再复制链接分享。
+4. 在“封面与生日信”中可以上传 PNG、JPEG 或 WebP 信封背景图片，最大 8MB；未上传时使用默认图案。
+5. 草稿保存在当前浏览器。跨设备编辑时，请先导出备份，再在另一台设备导入。
+6. 完成后选择“生成只读链接”，等待内容和媒体上传完成，再复制链接分享。
 
-收件人打开分享链接后只能浏览，不能编辑。生成分享页会把个性化文字、照片和模型上传到网站服务端。持有链接的人都可以查看。当前版本没有撤销已生成分享页的按钮，清空本地草稿也不会删除已生成的分享页。请先检查内容，再生成和分享链接。
+收件人打开分享链接后只能浏览，不能编辑。生成分享页会把个性化文字、信封背景图片、照片和模型上传到网站服务端。持有链接的人都可以查看。当前版本没有撤销已生成分享页的按钮，清空本地草稿也不会删除已生成的分享页。请先检查内容，再生成和分享链接。
 
 礼物编辑器支持多份礼物，最多 12 份。图像可使用 PNG、JPEG 或 WebP。模型使用 GLB 2.0，模型贴图需要嵌入 GLB 文件。请不要把生日档案备份、私人照片、模型文件或凭据提交到源码仓库。
 
@@ -56,10 +57,11 @@ A customizable birthday letter and gift reveal website template. Write a letter,
 1. Open the live template above and choose “编辑我的礼物” (Edit my gifts).
 2. Add the page title, recipient, birthday letter, signature, and final celebration button label.
 3. Edit each gift name, guessing hint, and personal reason. Add a photo or a GLB 2.0 model if desired.
-4. Drafts are stored in the current browser. To continue on another device, export a backup and import it there.
-5. Choose “生成只读链接” (Generate read only link). Wait for the text and media uploads to finish, then copy and share the link.
+4. In “封面与生日信”, upload an optional PNG, JPEG, or WebP envelope background, up to 8 MB. The default artwork remains when no image is uploaded.
+5. Drafts are stored in the current browser. To continue on another device, export a backup and import it there.
+6. Choose “生成只读链接” (Generate read only link). Wait for the text and media uploads to finish, then copy and share the link.
 
-Recipients can browse a shared page but cannot edit it. Generating a page uploads its personalized text, photos, and models to the hosted service. Anyone with the link can view it. There is currently no button to revoke a generated page. Clearing the local draft does not remove an existing shared page. Review the content before generating and sharing a link.
+Recipients can browse a shared page but cannot edit it. Generating a page uploads its personalized text, envelope background, photos, and models to the hosted service. Anyone with the link can view it. There is currently no button to revoke a generated page. Clearing the local draft does not remove an existing shared page. Review the content before generating and sharing a link.
 
 The editor supports up to 12 gifts. Images can be PNG, JPEG, or WebP. Models must use GLB 2.0, with textures embedded in the GLB file. Do not commit archive backups, private photos, model files, or credentials to the source repository.
 

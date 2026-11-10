@@ -19,6 +19,10 @@ async function readJson(response: Response): Promise<Record<string, unknown>> {
 
 async function buildJobs(archive: Archive): Promise<AssetJob[]> {
   const jobs: AssetJob[] = [];
+  if (archive.envelopeBackground) {
+    const blob = await (await fetch(archive.envelopeBackground)).blob();
+    jobs.push({ giftId: "__envelope__", kind: "image", blob, byteLength: blob.size });
+  }
   for (const gift of archive.gifts) {
     if (gift.image) {
       const blob = await (await fetch(gift.image)).blob();
@@ -64,9 +68,11 @@ export default function ShareGeneratorDialog({ archive, onClose }: Props) {
       const jobs = await buildJobs(cleanArchive);
       setTotal(jobs.length);
       setProgress(0);
+      const { envelopeBackground: _envelopeBackground, ...archiveMetadata } = cleanArchive;
       const metadata = {
-        ...cleanArchive,
-        gifts: cleanArchive.gifts.map(({ image: _image, model: _model, ...gift }) => gift),
+        ...archiveMetadata,
+        hasEnvelopeBackground: Boolean(cleanArchive.envelopeBackground),
+        gifts: archiveMetadata.gifts.map(({ image: _image, model: _model, ...gift }) => gift),
       };
       const created = await readJson(await fetch("/api/share", {
         method: "POST",
@@ -163,12 +169,12 @@ export default function ShareGeneratorDialog({ archive, onClose }: Props) {
         {error&&<p className="share-dialog-error" role="alert">{error}</p>}
         <button type="button" className="secondary-button share-done-button" onClick={close}><Check size={16}/>完成</button>
       </> : stage === "uploading" ? <>
-        <p className="share-dialog-copy">正在保存信件与礼物。保存完成后，这个页面只能查看，不能编辑。</p>
-        {total > 0 ? <div className="share-progress"><div className="share-progress-label"><span>正在上传照片与模型</span><span>{progress} / {total}</span></div><progress max={total} value={progress}/></div> : <p className="share-progress-note"><LoaderCircle className="share-spinner" size={16}/>正在保存文字内容…</p>}
+        <p className="share-dialog-copy">正在保存信件、礼物和背景图片。保存完成后，这个页面只能查看，不能编辑。</p>
+        {total > 0 ? <div className="share-progress"><div className="share-progress-label"><span>正在上传照片、模型和背景</span><span>{progress} / {total}</span></div><progress max={total} value={progress}/></div> : <p className="share-progress-note"><LoaderCircle className="share-spinner" size={16}/>正在保存文字内容…</p>}
         <p className="share-dialog-privacy">请保持此页面打开，完成后即可复制专属链接。</p>
       </> : <>
         <p className="share-dialog-copy">生成后会得到一条独立链接。收到链接的人可以查看这封信和全部礼物，但不能修改内容。</p>
-        <div className="share-dialog-notice"><strong>生成前请确认</strong><span>信件、礼物描述、照片和 3D 模型会保存到本网站，分享链接会持续有效。任何拿到链接的人都能查看，请不要放入不想公开的内容。</span></div>
+        <div className="share-dialog-notice"><strong>生成前请确认</strong><span>信件、礼物描述、照片、信封背景和 3D 模型会保存到本网站，分享链接会持续有效。任何拿到链接的人都能查看，请不要放入不想公开的内容。</span></div>
         {error&&<p className="share-dialog-error" role="alert">{error}</p>}
         <div className="share-dialog-actions"><button type="button" className="secondary-button" onClick={close}>再检查一下</button><button type="button" className="primary-button" onClick={generate}>确认并生成<Copy size={15}/></button></div>
       </>}
