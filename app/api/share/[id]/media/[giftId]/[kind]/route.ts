@@ -31,6 +31,7 @@ export async function GET(_request: Request, { params }: Context) {
   result.object.writeHttpMetadata(headers);
   headers.set("Content-Type", result.asset.contentType);
   headers.set("X-Content-Type-Options", "nosniff");
+  headers.set("Cache-Control", "private, no-store");
   return new Response(result.object.body, { headers });
 }
 

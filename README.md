@@ -19,7 +19,7 @@
 5. 草稿保存在当前浏览器。跨设备编辑时，请先导出备份，再在另一台设备导入。
 6. 完成后选择“生成只读链接”，等待内容和媒体上传完成，再复制链接分享。
 
-收件人打开分享链接后只能浏览，不能编辑。生成分享页会把个性化文字、信封背景图片、照片和模型上传到网站服务端。持有链接的人都可以查看。当前版本没有撤销已生成分享页的按钮，清空本地草稿也不会删除已生成的分享页。请先检查内容，再生成和分享链接。
+收件人打开分享链接后只能浏览，不能编辑。生成分享页会把个性化文字、信封背景图片、照片和模型上传到网站服务端。持有链接的人都可以查看。顶部的“分享页管理”可管理当前浏览器创建的新分享页，支持复制链接和删除。删除后链接立即失效，页面文字及上传的媒体文件会从服务端移除。管理凭证只保存在创建时使用的浏览器中；清除浏览器网站数据后将无法从管理列表删除。启用此功能前生成的分享页没有保存管理凭证，因此不会出现在列表中。
 
 礼物编辑器支持多份礼物，最多 12 份。图像可使用 PNG、JPEG 或 WebP。模型使用 GLB 2.0，模型贴图需要嵌入 GLB 文件。请不要把生日档案备份、私人照片、模型文件或凭据提交到源码仓库。
 
@@ -61,7 +61,7 @@ A customizable birthday letter and gift reveal website template. Write a letter,
 5. Drafts are stored in the current browser. To continue on another device, export a backup and import it there.
 6. Choose “生成只读链接” (Generate read only link). Wait for the text and media uploads to finish, then copy and share the link.
 
-Recipients can browse a shared page but cannot edit it. Generating a page uploads its personalized text, envelope background, photos, and models to the hosted service. Anyone with the link can view it. There is currently no button to revoke a generated page. Clearing the local draft does not remove an existing shared page. Review the content before generating and sharing a link.
+Recipients can browse a shared page but cannot edit it. Generating a page uploads its personalized text, envelope background, photos, and models to the hosted service. Anyone with the link can view it. Use “分享页管理” (Manage shared pages) in the header to view, copy, or delete new pages created in the current browser. Deletion immediately disables the link and removes the page text and uploaded media from the server. Management credentials are stored only in the browser used to create each page. Clearing that browser’s site data removes the ability to delete it from the list. Pages created before this feature was added do not have saved credentials and will not appear in the list.
 
 The editor supports up to 12 gifts. Images can be PNG, JPEG, or WebP. Models must use GLB 2.0, with textures embedded in the GLB file. Do not commit archive backups, private photos, model files, or credentials to the source repository.
 

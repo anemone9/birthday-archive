@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Copy, LoaderCircle, LockKeyhole, X } from "lucide-react";
+import { Check, Copy, ExternalLink, LoaderCircle, LockKeyhole, Trash2, X } from "lucide-react";
 import { validateArchive, type Archive } from "@/lib/archive";
+import { loadManagedShares, removeManagedShare, saveManagedShare, type ManagedShare } from "@/lib/storage";
 
 type Props = { archive: Archive; onClose: () => void };
 type AssetJob = { giftId: string; kind: "image" | "model"; blob: Blob; byteLength: number };
@@ -36,28 +37,45 @@ async function buildJobs(archive: Archive): Promise<AssetJob[]> {
   return jobs;
 }
 
+function shareUrl(id: string) {
+  return new URL(`/p/${id}`, window.location.origin).toString();
+}
+
 export default function ShareGeneratorDialog({ archive, onClose }: Props) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [stage, setStage] = useState<"confirm" | "uploading" | "done">("confirm");
   const [progress, setProgress] = useState(0);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState("");
-  const [shareUrl, setShareUrl] = useState("");
+  const [shareUrlValue, setShareUrlValue] = useState("");
   const [copied, setCopied] = useState(false);
   const [announcement, setAnnouncement] = useState("");
+  const [managedShares, setManagedShares] = useState<ManagedShare[]>([]);
+  const [managedLoadError, setManagedLoadError] = useState("");
+  const [managedWarning, setManagedWarning] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState("");
+  const [deletingId, setDeletingId] = useState("");
+  const [deleteErrors, setDeleteErrors] = useState<Record<string, string>>({});
+  const [copiedShareId, setCopiedShareId] = useState("");
 
   useEffect(() => {
     const node = dialog.current;
     if (!node) return;
     if (!node.open) node.showModal();
+    loadManagedShares().then(setManagedShares).catch(cause => {
+      setManagedLoadError(cause instanceof Error ? cause.message : "无法读取本地管理清单。");
+    });
     return () => { if (node.open) node.close(); };
   }, []);
 
-  const close = () => { if (stage !== "uploading") dialog.current?.close(); };
+  const close = () => {
+    if (stage !== "uploading" && !deletingId) dialog.current?.close();
+  };
 
   async function generate() {
-    if (stage === "uploading") return;
+    if (stage === "uploading" || deletingId) return;
     setError("");
+    setManagedWarning("");
     setAnnouncement("");
     setStage("uploading");
     let shareId = "";
@@ -125,9 +143,22 @@ export default function ShareGeneratorDialog({ archive, onClose }: Props) {
         }
       }
       if (!path) throw new Error("分享页没有返回可用链接，请重试。");
-      setShareUrl(new URL(path, window.location.origin).toString());
+
+      const managedShare: ManagedShare = {
+        id: shareId,
+        token,
+        title: cleanArchive.title || cleanArchive.brand || "生日档案",
+        createdAt: new Date().toISOString(),
+      };
+      setManagedShares(current => [managedShare, ...current.filter(item => item.id !== shareId)]);
+      try {
+        await saveManagedShare(managedShare);
+      } catch (cause) {
+        setManagedWarning(cause instanceof Error ? cause.message : "管理凭证未能保存在此浏览器，请先不要关闭窗口。");
+      }
+      setShareUrlValue(new URL(path, window.location.origin).toString());
       setStage("done");
-      setAnnouncement("只读生日页已生成，可以复制链接分享。");
+      setAnnouncement("只读生日页已生成，可以复制链接分享。管理凭证已保存在当前浏览器。");
     } catch (cause) {
       if (shareId && token && !published) {
         try {
@@ -144,9 +175,9 @@ export default function ShareGeneratorDialog({ archive, onClose }: Props) {
     }
   }
 
-  async function copyLink() {
+  async function copyCurrentLink() {
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      await navigator.clipboard.writeText(shareUrlValue);
       setCopied(true);
       setAnnouncement("链接已复制。");
       window.setTimeout(() => setCopied(false), 1800);
@@ -155,17 +186,62 @@ export default function ShareGeneratorDialog({ archive, onClose }: Props) {
     }
   }
 
+  async function copyManagedLink(share: ManagedShare) {
+    try {
+      await navigator.clipboard.writeText(shareUrl(share.id));
+      setCopiedShareId(share.id);
+      setAnnouncement("分享链接已复制。");
+      window.setTimeout(() => setCopiedShareId(current => current === share.id ? "" : current), 1800);
+    } catch {
+      setDeleteErrors(current => ({ ...current, [share.id]: "复制失败，请打开页面后从地址栏复制。" }));
+    }
+  }
+
+  async function deleteManagedShare(share: ManagedShare) {
+    if (confirmDeleteId !== share.id) {
+      setConfirmDeleteId(share.id);
+      setDeleteErrors(current => ({ ...current, [share.id]: "" }));
+      return;
+    }
+    setDeletingId(share.id);
+    setDeleteErrors(current => ({ ...current, [share.id]: "" }));
+    try {
+      const response = await fetch(`/api/share/${share.id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${share.token}` },
+        cache: "no-store",
+      });
+      if (response.status !== 204) await readJson(response);
+      setManagedShares(current => current.filter(item => item.id !== share.id));
+      setConfirmDeleteId("");
+      if (shareUrlValue === shareUrl(share.id)) {
+        setShareUrlValue("");
+        setStage("confirm");
+      }
+      setAnnouncement("分享页面已删除，原链接已失效。");
+      try {
+        await removeManagedShare(share.id);
+      } catch (cause) {
+        setManagedWarning(cause instanceof Error ? cause.message : "服务器已删除页面，但本地管理记录没有清除。");
+      }
+    } catch (cause) {
+      setDeleteErrors(current => ({ ...current, [share.id]: cause instanceof Error ? cause.message : "删除失败，请稍后重试。" }));
+    } finally {
+      setDeletingId("");
+    }
+  }
+
   return <dialog ref={dialog} className="share-dialog" aria-labelledby="share-dialog-title"
-    onCancel={event => { if (stage === "uploading") event.preventDefault(); }} onClose={onClose}>
+    onCancel={event => { if (stage === "uploading" || deletingId) event.preventDefault(); }} onClose={onClose}>
     <div className="share-dialog-inner">
-      <button type="button" className="share-dialog-close icon-button" onClick={close} disabled={stage === "uploading"} aria-label="关闭"><X size={18}/></button>
+      <button type="button" className="share-dialog-close icon-button" onClick={close} disabled={stage === "uploading" || Boolean(deletingId)} aria-label="关闭"><X size={18}/></button>
       <div className="share-dialog-icon"><LockKeyhole size={21}/></div>
       <p className="eyebrow">A little page of your own</p>
       <h2 id="share-dialog-title">{stage === "done" ? "这份心意，已经准备好了" : "生成一份只读生日页"}</h2>
       {stage === "done" ? <>
         <p className="share-dialog-copy">把链接发给收件人，打开后可以浏览信件、礼物和最后的烟花庆祝。</p>
         <label className="share-link-label" htmlFor="share-link">专属分享链接</label>
-        <div className="share-link-row"><input id="share-link" readOnly value={shareUrl} onFocus={event => event.currentTarget.select()}/><button type="button" className="primary-button compact" onClick={copyLink}><Copy size={15}/>{copied ? "已复制" : "复制"}</button></div>
+        <div className="share-link-row"><input id="share-link" readOnly value={shareUrlValue} onFocus={event => event.currentTarget.select()}/><button type="button" className="primary-button compact" onClick={copyCurrentLink}><Copy size={15}/>{copied ? "已复制" : "复制"}</button></div>
         {error&&<p className="share-dialog-error" role="alert">{error}</p>}
         <button type="button" className="secondary-button share-done-button" onClick={close}><Check size={16}/>完成</button>
       </> : stage === "uploading" ? <>
@@ -174,10 +250,24 @@ export default function ShareGeneratorDialog({ archive, onClose }: Props) {
         <p className="share-dialog-privacy">请保持此页面打开，完成后即可复制专属链接。</p>
       </> : <>
         <p className="share-dialog-copy">生成后会得到一条独立链接。收到链接的人可以查看这封信和全部礼物，但不能修改内容。</p>
-        <div className="share-dialog-notice"><strong>生成前请确认</strong><span>信件、礼物描述、照片、信封背景和 3D 模型会保存到本网站，分享链接会持续有效。任何拿到链接的人都能查看，请不要放入不想公开的内容。</span></div>
+        <div className="share-dialog-notice"><strong>生成前请确认</strong><span>信件、礼物描述、照片、信封背景和 3D 模型会保存到网站。任何拿到分享链接的人都能查看。管理凭证会保存在当前浏览器，你之后可以在这里删除页面并撤销链接。</span></div>
         {error&&<p className="share-dialog-error" role="alert">{error}</p>}
         <div className="share-dialog-actions"><button type="button" className="secondary-button" onClick={close}>再检查一下</button><button type="button" className="primary-button" onClick={generate}>确认并生成<Copy size={15}/></button></div>
       </>}
+
+      {stage !== "uploading" && <section className="share-managed" aria-labelledby="share-managed-title">
+        <div className="share-managed-heading"><h3 id="share-managed-title">已生成的分享页</h3><span>{managedShares.length}</span></div>
+        <p className="share-managed-note">管理凭证只保存在此浏览器。清除浏览器数据或更换设备后，无法从这里撤销链接。</p>
+        {managedLoadError&&<p className="share-dialog-error" role="alert">{managedLoadError}</p>}
+        {managedWarning&&<p className="share-dialog-error" role="alert">{managedWarning}</p>}
+        {managedShares.length ? <div className="share-managed-list">
+          {managedShares.map(share=><article className="share-managed-card" key={share.id}>
+            <div className="share-managed-card-heading"><div><strong>{share.title||"生日档案"}</strong><span>生成于 {new Date(share.createdAt).toLocaleString("zh-CN")}</span></div><a className="text-button small" href={`/p/${share.id}`} target="_blank" rel="noreferrer"><ExternalLink size={14}/>打开</a></div>
+            <div className="share-managed-card-actions"><button type="button" className="text-button small" onClick={()=>copyManagedLink(share)} disabled={Boolean(deletingId)}><Copy size={14}/>{copiedShareId===share.id?"已复制":"复制链接"}</button>{confirmDeleteId===share.id ? <><span className="share-delete-confirm-copy">删除后链接和已上传内容都会失效。</span><button type="button" className="text-button small" onClick={()=>setConfirmDeleteId("")} disabled={Boolean(deletingId)}>取消</button><button type="button" className="text-button small share-delete-confirm" onClick={()=>deleteManagedShare(share)} disabled={Boolean(deletingId)}>{deletingId===share.id?<LoaderCircle className="share-spinner" size={14}/>:<Trash2 size={14}/>}确认删除</button></> : <button type="button" className="text-button small share-delete-trigger" onClick={()=>deleteManagedShare(share)} disabled={Boolean(deletingId)}><Trash2 size={14}/>删除</button>}</div>
+            {deleteErrors[share.id]&&<p className="share-dialog-error" role="alert">{deleteErrors[share.id]}</p>}
+          </article>)}
+        </div> : !managedLoadError ? <p className="share-managed-empty">这里还没有可管理的页面。功能更新前生成的页面未保存删除凭证，因此不会显示在清单中。</p> : null}
+      </section>}
       <p className="share-dialog-live sr-only" role="status" aria-live="polite">{announcement}</p>
     </div>
   </dialog>;

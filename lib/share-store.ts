@@ -75,7 +75,7 @@ export function validateExpectedAssets(input: unknown, archive: Archive, allowEn
     if (byteLength > limit) throw new Error(kind === "image" ? "单张照片不能超过 8MB。" : "单个模型不能超过 20MB。");
     total += byteLength;
     if (total > 80 * 1024 * 1024) throw new Error("照片、信封背景和模型合计不能超过 80MB。");
-    return { giftId, kind, byteLength };
+    return { giftId, kind: kind as SharedAssetKind, byteLength };
   });
   return result;
 }

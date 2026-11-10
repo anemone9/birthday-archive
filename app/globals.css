@@ -284,6 +284,23 @@ body{background:var(--lavender)}
 .share-link-row{display:flex;gap:8px;align-items:stretch}
 .share-link-row input{min-width:0;flex:1;padding:10px 11px;border:1px solid #dfb8c5;border-radius:6px;background:rgba(255,255,255,.8);color:#684253;font-size:12px}
 .share-link-row .primary-button{gap:7px;padding:8px 13px}
+.share-managed{margin-top:24px;padding-top:18px;border-top:1px solid rgba(202,143,163,.38)}
+.share-managed-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.share-managed-heading h3{font:500 14px/1.6 var(--display);color:#684253}
+.share-managed-heading>span{min-width:24px;padding:1px 7px;border:1px solid #dfb8c5;border-radius:999px;background:rgba(255,255,255,.7);color:#80576a;text-align:center;font-size:11px}
+.share-managed-note,.share-managed-empty{margin-top:5px;color:#8b7380;font-size:10px;line-height:1.7}
+.share-managed-list{display:grid;gap:9px;margin-top:12px;max-height:240px;overflow:auto;padding:1px 4px 2px 1px}
+.share-managed-card{padding:11px 12px;border:1px solid rgba(215,165,180,.72);border-radius:8px;background:rgba(255,255,255,.58)}
+.share-managed-card-heading,.share-managed-card-heading>div,.share-managed-card-actions{display:flex;align-items:center}
+.share-managed-card-heading{justify-content:space-between;gap:10px}
+.share-managed-card-heading>div{min-width:0;flex-direction:column;align-items:flex-start;gap:1px}
+.share-managed-card-heading strong{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:600;color:#684253}
+.share-managed-card-heading span{color:#8b7380;font-size:10px}
+.share-managed-card-heading .text-button,.share-managed-card-actions .text-button{min-height:30px;gap:5px;padding:4px 6px;font-size:10px;white-space:nowrap}
+.share-managed-card-actions{flex-wrap:wrap;gap:7px;margin-top:7px;padding-top:7px;border-top:1px solid rgba(215,165,180,.38)}
+.share-managed-card-actions .share-delete-trigger,.share-managed-card-actions .share-delete-confirm{margin-left:auto;color:#9b414b}
+.share-managed-card-actions .share-delete-confirm-copy{flex:1 1 100%;color:#8a5a65;font-size:10px;line-height:1.6}
+.share-managed-card .share-dialog-error{margin-top:7px}
 .share-done-button{display:flex;margin:20px auto 0}
 .share-dialog-error{margin:14px 0 0;padding:9px 12px;border:1px solid #d596a7;border-radius:6px;background:#fff3f5;color:#8d3851;font-size:12px;line-height:1.7}
 .share-dialog-live{position:absolute}
