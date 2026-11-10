@@ -1,5 +1,5 @@
 {
-  "d1": null,
-  "r2": null,
+  "d1": "DB",
+  "r2": "BUCKET",
   "project_id": "REPLACE_WITH_YOUR_OWN_SITE_PROJECT_ID"
 }

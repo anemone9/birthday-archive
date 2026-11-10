@@ -1,6 +1,6 @@
 import type { Archive } from './archive';
 export type StoredDraft={archive:Archive;revision:number};
-const DB='birthday-archive-v1';
+const DB='birthday-archive-generator-v1';
 function openDB():Promise<IDBDatabase> {
   return new Promise((resolve,reject)=>{
     const request=indexedDB.open(DB,1);
