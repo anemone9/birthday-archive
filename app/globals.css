@@ -316,3 +316,4 @@ body{background:var(--lavender)}
   .share-link-row .primary-button{padding:8px 10px}
 }
 @media(prefers-reduced-motion:reduce){.share-spinner{animation:none}}
+@media(display-mode:standalone){.birthday-app{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}}
